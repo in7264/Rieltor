@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Estate Client & Property Management</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Real Estate Client & Property Management</h1>
+
+        <!-- Tab Buttons -->
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'clientTab')">Client Registration</button>
+            <button class="tablinks" onclick="openTab(event, 'propertyTab')">Property Registration</button>
+            <button class="tablinks" onclick="openTab(event, 'agreementTab')">Agreement Management</button>
+        </div>
+
+        <!-- Client Registration Form -->
+        <div id="clientTab" class="tabcontent">
+            <h2>Client Registration</h2>
+            <form id="clientForm">
+                <input type="text" id="name" placeholder="Name" required>
+                <input type="text" id="email" placeholder="Email" required>
+                <input type="text" id="phone" placeholder="Phone" required>
+                <button type="submit">Register Client</button>
+            </form>
+
+            <h2>Client List</h2>
+            <table id="clientTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Select</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="clientList">
+                    <!-- Client data will be inserted here -->
+                </tbody>
+            </table>
+
+            <!-- Button to delete selected clients -->
+            <button onclick="deleteSelectedClients()">Delete Selected</button>
+        </div>
+
+        <!-- Property Registration Form -->
+        <div id="propertyTab" class="tabcontent" style="display: none;">
+            <h2>Property Registration</h2>
+            <form id="propertyForm">
+                <input type="text" id="address" placeholder="Address" required>
+                <input type="text" id="type" placeholder="Type" required>
+                <input type="text" id="price" placeholder="Price" required>
+                <button type="submit">Add Property</button>
+            </form>
+
+            <h2>Property List</h2>
+            <table id="propertyTable">
+                <thead>
+                    <tr>
+                        <th>Address</th>
+                        <th>Type</th>
+                        <th>Price</th>
+                        <th>Select</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="propertyList">
+                    <!-- Property data will be inserted here -->
+                </tbody>
+            </table>
+
+            <!-- Button to delete selected properties -->
+            <button onclick="deleteSelectedProperties()">Delete Selected</button>
+        </div>
+
+        <div id="agreementTab" class="tabcontent" style="display: none;">
+            <h2>Agreement Management</h2>
+
+            <!-- Agreement Registration Form -->
+            <form id="agreementForm">
+                <input type="text" id="buyer" placeholder="Buyer Name" list="filteredBuyers" oninput="filterBuyers(this.value)" required>
+                <datalist id="filteredBuyers">
+                    <!-- Опції для відображення покупців будуть додані динамічно через JavaScript -->
+                </datalist>
+                <input type="text" id="property" placeholder="Property Address" list="filteredProperties" oninput="filterProperties(this.value)" required>
+                <datalist id="filteredProperties">
+                    <!-- Опції для відображення адрес нерухомості будуть додані динамічно через JavaScript -->
+                </datalist>
+                <input type="text" id="price1" placeholder="Price" required>
+                <button type="submit">Create Agreement</button>
+            </form>
+
+            <!-- Agreement List -->
+            <h2>Agreement List</h2>
+            <table id="agreementTable">
+                <thead>
+                    <tr>
+                        <th>Buyer</th>
+                        <th>Property</th>
+                        <th>Price</th>
+                        <th>Select</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="agreementList">
+                    <!-- Agreement data will be inserted here -->
+                </tbody>
+            </table>
+
+            <!-- Button to delete selected agreements -->
+            <button onclick="deleteSelectedAgreements()">Delete Selected</button>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+    <script>
+        // Function to switch tabs
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+
+            // Hide all tab content
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            // Deactivate all tab links
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the selected tab content and mark the button as active
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // By default, open the first tab (Client Registration)
+        document.getElementsByClassName("tablinks")[0].click();
+
+        function filterBuyers(input) {
+            var clients = JSON.parse(localStorage.getItem('clients')) || [];
+            var filteredClients = clients.filter(client => client.name.toLowerCase().includes(input.toLowerCase()));
+            displayFilteredBuyers(filteredClients);
+        }
+
+        // Function to display filtered buyers
+        function displayFilteredBuyers(filteredClients) {
+            var buyerInput = document.getElementById('buyer');
+            var datalist = document.createElement('datalist');
+            datalist.id = 'filteredBuyers';
+
+            filteredClients.forEach(client => {
+                var option = document.createElement('option');
+                option.value = client.name;
+                datalist.appendChild(option);
+            });
+
+            // Remove previous datalist and append the updated one
+            var existingDatalist = document.getElementById('filteredBuyers');
+            if (existingDatalist) {
+                existingDatalist.remove();
+            }
+            buyerInput.parentNode.insertBefore(datalist, buyerInput.nextSibling);
+        }
+
+        // Function to filter properties by address input
+        function filterProperties(input) {
+            var properties = JSON.parse(localStorage.getItem('properties')) || [];
+            var filteredProperties = properties.filter(property => property.address.toLowerCase().includes(input.toLowerCase()));
+            displayFilteredProperties(filteredProperties);
+        }
+
+        // Function to display filtered properties
+        function displayFilteredProperties(filteredProperties) {
+            var propertyInput = document.getElementById('property');
+            var datalist = document.createElement('datalist');
+            datalist.id = 'filteredProperties';
+
+            filteredProperties.forEach(property => {
+                var option = document.createElement('option');
+                option.value = property.address;
+                datalist.appendChild(option);
+            });
+
+            // Remove previous datalist and append the updated one
+            var existingDatalist = document.getElementById('filteredProperties');
+            if (existingDatalist) {
+                existingDatalist.remove();
+            }
+            propertyInput.parentNode.insertBefore(datalist, propertyInput.nextSibling);
+        }
+    </script>
+</body>
+</html>
